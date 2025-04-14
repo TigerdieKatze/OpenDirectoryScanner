@@ -54,7 +54,7 @@ impl NSFWDetector {
                 _ => false,
             });
 
-        Ok(check_results);
+        Ok(check_results)
     }
 }
 
