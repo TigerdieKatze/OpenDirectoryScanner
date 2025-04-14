@@ -89,6 +89,7 @@ struct DirectoryReport {
     document_count: usize,
     other_count: usize,
     nsfw_count: usize,
+    nsfw_files: Vec<String>,
     largest_file: Option<FileInfo>,
     largest_directory: Option<(String, u64)>,
 }
@@ -106,6 +107,7 @@ impl DirectoryReport {
             document_count: 0,
             other_count: 0,
             nsfw_count: 0,
+            nsfw_files: Vec::new(),
             largest_file: None,
             largest_directory: None,
         }
@@ -155,6 +157,13 @@ impl DirectoryReport {
             println!("\n=== Largest Directory ===");
             println!("Path: {}", dir);
             println!("Size: {} bytes ({} MB)", size, size / 1_048_576);
+        }
+
+        if self.nsfw_count > 0 {
+            println!("\n=== NSFW Files ===");
+            for file in &self.nsfw_files {
+                println!("{}", file);
+            }
         }
     }
 
@@ -343,13 +352,26 @@ fn scan_directory(
             continue;
         }
 
+        // Clean up the href and handle URL construction carefully
+        let clean_href = href.trim_end_matches('/');
+
+        // Proper URL joining to handle various edge cases
         let file_url = if href.starts_with("http") {
             href.to_string()
         } else {
-            format!("{}{}", url.trim_end_matches('/'), href)
+            // Ensure the base URL ends with a slash if we're appending a relative path
+            let base_url = if url.ends_with('/') {
+                url.to_string()
+            } else {
+                format!("{}/", url)
+            };
+
+            // Remove any leading slash from href to avoid double slashes
+            let path_part = href.trim_start_matches('/');
+            format!("{}{}", base_url, path_part)
         };
 
-        let name = href.trim_end_matches('/');
+        let name = clean_href;
         let is_directory = href.ends_with('/');
 
         // Try to find file size in the HTML
@@ -377,15 +399,19 @@ fn scan_directory(
         let mut is_nsfw = None;
         if matches!(file_type, FileType::Image(_)) {
             // Only check images for NSFW content
-            match nsfw_detector.is_nsfw(&file_url, client) {
+            // Ensure the URL doesn't end with a slash for files
+            let image_url = file_url.trim_end_matches('/').to_string();
+
+            match nsfw_detector.is_nsfw(&image_url, client) {
                 Ok(nsfw) => {
                     is_nsfw = Some(nsfw);
                     if nsfw {
                         report.nsfw_count += 1;
+                        report.nsfw_files.push(image_url.clone());
                     }
                 }
                 Err(e) => {
-                    eprintln!("Failed to check NSFW for {}: {}", file_url, e);
+                    eprintln!("Failed to check NSFW for {}: {}", image_url, e);
                 }
             }
         }
