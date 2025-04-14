@@ -45,7 +45,7 @@ impl NSFWDetector {
         println!("NSFW results for {}: {:?}", image_url, result);
 
         // Check if any of the explicit categories have high scores
-        let is_nsfw = result
+        let check_results = result
             .iter()
             .any(|classification| match classification.metric {
                 nsfw::model::Metric::Hentai => classification.score > 0.6,
@@ -54,7 +54,7 @@ impl NSFWDetector {
                 _ => false,
             });
 
-        return Ok(is_nsfw);
+        Ok(check_results);
     }
 }
 
