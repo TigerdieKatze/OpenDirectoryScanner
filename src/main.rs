@@ -1,5 +1,5 @@
-use clap::{App, Arg};
-use image::io::Reader as ImageReader;
+use clap::{Command, Arg};
+use image::ImageReader;
 use nsfw::{create_model, examine};
 use reqwest::blocking::Client;
 use scraper::{Html, Selector};
@@ -35,11 +35,26 @@ impl NSFWDetector {
             .with_guessed_format()?
             .decode()?;
 
-        // Analyze the image
-        let result = examine(&self.model, &img)?;
+        // Convert to Rgba8 format as required by the examine function
+        let rgba_img = img.to_rgba8();
 
-        // Consider an image NSFW if the porn or sexy scores are high
-        Ok(result.porn > 0.6 || result.sexy > 0.8)
+        // Analyze the image
+        let result = examine(&self.model, &rgba_img)?;
+        
+        // Print the results for debugging
+        println!("NSFW results for {}: {:?}", image_url, result);
+
+        // Check if any of the explicit categories have high scores
+        let is_nsfw = result.iter().any(|classification| {
+            match classification.metric {
+                nsfw::model::Metric::Hentai => classification.score > 0.6,
+                nsfw::model::Metric::Porn => classification.score > 0.5,
+                nsfw::model::Metric::Sexy => classification.score > 0.8,
+                _ => false
+            }
+        });
+
+        return Ok(is_nsfw);
     }
 }
 
@@ -341,7 +356,8 @@ fn scan_directory(
         let size_text = element
             .parent()
             .and_then(|parent| {
-                parent
+                let parent_element = scraper::ElementRef::wrap(parent)?;
+                parent_element
                     .select(&Selector::parse("td:nth-child(2)").unwrap())
                     .next()
             })
@@ -472,49 +488,49 @@ fn scan_directory(
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let matches = App::new("Open Directory Scanner")
+    let matches = Command::new("Open Directory Scanner")
         .version("1.0")
         .author("TigerdieKatze")
         .about("Scans open web directories and creates reports")
         .arg(
-            Arg::with_name("url")
+            Arg::new("url")
                 .help("The URL of the directory to scan")
                 .required(true)
                 .index(1),
         )
         .arg(
-            Arg::with_name("depth")
-                .short("d")
+            Arg::new("depth")
+                .short('d')
                 .long("depth")
                 .help("Maximum directory depth to scan")
-                .takes_value(true)
+                .value_name("DEPTH")
                 .default_value("3"),
         )
         .arg(
-            Arg::with_name("output")
-                .short("o")
+            Arg::new("output")
+                .short('o')
                 .long("output")
                 .help("Output file path for the report")
-                .takes_value(true),
+                .value_name("FILE"),
         )
         .arg(
-            Arg::with_name("timeout")
-                .short("t")
+            Arg::new("timeout")
+                .short('t')
                 .long("timeout")
                 .help("Request timeout in seconds")
-                .takes_value(true)
+                .value_name("SECONDS")
                 .default_value("30"),
         )
         .get_matches();
 
-    let url = matches.value_of("url").unwrap();
+    let url = matches.get_one::<String>("url").unwrap();
     let max_depth = matches
-        .value_of("depth")
+        .get_one::<String>("depth")
         .unwrap()
         .parse::<u32>()
         .unwrap_or(3);
     let timeout = matches
-        .value_of("timeout")
+        .get_one::<String>("timeout")
         .unwrap()
         .parse::<u64>()
         .unwrap_or(30);
@@ -531,7 +547,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     println!("\n=== Scan Complete ===");
     report.print();
 
-    if let Some(output_path) = matches.value_of("output") {
+    if let Some(output_path) = matches.get_one::<String>("output") {
         report.save_to_file(output_path)?;
         println!("\nReport saved to: {}", output_path);
     }
