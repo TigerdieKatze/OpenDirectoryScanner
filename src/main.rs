@@ -17,7 +17,7 @@ struct NSFWDetector {
 impl NSFWDetector {
     fn new() -> Result<Self, Box<dyn Error>> {
         // load file from project directory
-        let model_data = include_bytes!("../model.onnx");
+        let model_data = include_bytes!("resources/model.onnx");
         let model = create_model(model_data)?;
 
         Ok(NSFWDetector { model })
@@ -282,7 +282,7 @@ fn parse_size(size_str: &str) -> u64 {
     }
 
     // Handle suffixes
-    let mut chars = size_str.chars();
+    let chars = size_str.chars();
     let mut number_part = String::new();
     let mut suffix_part = String::new();
 
