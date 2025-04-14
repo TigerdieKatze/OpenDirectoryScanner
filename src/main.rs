@@ -64,6 +64,7 @@ struct FileInfo {
     url: String,
     size: u64,
     file_type: FileType,
+    #[allow(dead_code)]
     is_nsfw: Option<bool>,
 }
 
