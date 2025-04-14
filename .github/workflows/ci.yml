@@ -18,7 +18,7 @@ jobs:
     name: Check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       
       - name: Setup Rust
         uses: actions-rs/toolchain@v1
@@ -58,7 +58,7 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       
       - name: Setup Rust
         uses: actions-rs/toolchain@v1
@@ -106,7 +106,7 @@ jobs:
             asset_name: opendirectoryscanner-macos-amd64
     
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       
       - name: Setup Rust
         uses: actions-rs/toolchain@v1
@@ -136,7 +136,7 @@ jobs:
           args: --release
       
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.asset_name }}
           path: target/release/${{ matrix.artifact_name }}
