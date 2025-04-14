@@ -1,0 +1,29 @@
+[package]
+name = "opendirectoryscanner"
+version = "0.1.0"
+edition = "2024"
+
+description = "A tool for scanning open web directories and generating reports with NSFW detection"
+authors = ["TigerdieKatze <tiger.die.katze@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/TigerdieKatze/OpenDirectoryScanner"
+
+[dependencies]
+clap = "2.33.3"
+reqwest = { version = "0.11.18", features = ["blocking", "json"] }
+scraper = "0.16.0"
+serde = { version = "1.0.164", features = ["derive"] }
+serde_json = "1.0.99"
+image = { version = "0.24.7", default-features = false, features = ["jpeg", "png", "gif", "webp"] }
+nsfw = { version = "0.1.0", default-features = false, features = ["jpeg", "png", "gif", "webp"] }
+anyhow = "1.0.71"
+thiserror = "1.0.40"
+lazy_static = "1.4.0"
+indicatif = "0.17.5"
+colored = "2.0.4"
+
+[dev-dependencies]
+tempfile = "3.7.0"
+mockito = "1.1.0"
+assert_cmd = "2.0.11"
