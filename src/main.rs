@@ -159,7 +159,6 @@ impl DirectoryReport {
             println!("Size: {} bytes ({} MB)", size, size / 1_048_576);
         }
 
-        
         if self.nsfw_count > 0 {
             println!("\n=== NSFW Files ===");
             for file in &self.nsfw_files {
@@ -355,18 +354,18 @@ fn scan_directory(
 
         // Clean up the href and handle URL construction carefully
         let clean_href = href.trim_end_matches('/');
-        
+
         // Proper URL joining to handle various edge cases
         let file_url = if href.starts_with("http") {
             href.to_string()
         } else {
             // Ensure the base URL ends with a slash if we're appending a relative path
             let base_url = if url.ends_with('/') {
-            url.to_string()
+                url.to_string()
             } else {
-            format!("{}/", url)
+                format!("{}/", url)
             };
-            
+
             // Remove any leading slash from href to avoid double slashes
             let path_part = href.trim_start_matches('/');
             format!("{}{}", base_url, path_part)
@@ -380,10 +379,10 @@ fn scan_directory(
         let size_text = element
             .parent()
             .and_then(|parent| {
-            let parent_element = scraper::ElementRef::wrap(parent)?;
-            parent_element
-                .select(&Selector::parse("td:nth-child(2)").unwrap())
-                .next()
+                let parent_element = scraper::ElementRef::wrap(parent)?;
+                parent_element
+                    .select(&Selector::parse("td:nth-child(2)").unwrap())
+                    .next()
             })
             .map(|size_element| size_element.text().collect::<String>())
             .unwrap_or_default();
@@ -402,18 +401,18 @@ fn scan_directory(
             // Only check images for NSFW content
             // Ensure the URL doesn't end with a slash for files
             let image_url = file_url.trim_end_matches('/').to_string();
-            
+
             match nsfw_detector.is_nsfw(&image_url, client) {
-            Ok(nsfw) => {
-                is_nsfw = Some(nsfw);
-                if nsfw {
-                report.nsfw_count += 1;
-                report.nsfw_files.push(image_url.clone());
+                Ok(nsfw) => {
+                    is_nsfw = Some(nsfw);
+                    if nsfw {
+                        report.nsfw_count += 1;
+                        report.nsfw_files.push(image_url.clone());
+                    }
                 }
-            }
-            Err(e) => {
-                eprintln!("Failed to check NSFW for {}: {}", image_url, e);
-            }
+                Err(e) => {
+                    eprintln!("Failed to check NSFW for {}: {}", image_url, e);
+                }
             }
         }
 
