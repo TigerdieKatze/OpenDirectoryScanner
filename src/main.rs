@@ -1,4 +1,4 @@
-use clap::{Command, Arg};
+use clap::{Arg, Command};
 use image::ImageReader;
 use nsfw::{create_model, examine};
 use reqwest::blocking::Client;
@@ -40,19 +40,19 @@ impl NSFWDetector {
 
         // Analyze the image
         let result = examine(&self.model, &rgba_img)?;
-        
+
         // Print the results for debugging
         println!("NSFW results for {}: {:?}", image_url, result);
 
         // Check if any of the explicit categories have high scores
-        let is_nsfw = result.iter().any(|classification| {
-            match classification.metric {
+        let is_nsfw = result
+            .iter()
+            .any(|classification| match classification.metric {
                 nsfw::model::Metric::Hentai => classification.score > 0.6,
                 nsfw::model::Metric::Porn => classification.score > 0.5,
                 nsfw::model::Metric::Sexy => classification.score > 0.8,
-                _ => false
-            }
-        });
+                _ => false,
+            });
 
         return Ok(is_nsfw);
     }
