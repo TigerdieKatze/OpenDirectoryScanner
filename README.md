@@ -13,22 +13,9 @@ A powerful Rust tool that scans web directories and generates comprehensive repo
 - 📏 **Size Analysis**: Tracks total size, identifies largest files and directories
 - 🚨 **NSFW Detection**: Uses the [nsfw](https://crates.io/crates/nsfw) crate for detecting not-safe-for-work images
 - 📝 **Report Generation**: Creates detailed reports in both console output and markdown formats
+- 🌐 **Automatic Model Download**: Downloads the NSFW detection model automatically if not present
 
 ## Installation
-
-### Prerequisites
-
-Before building the application, you need to download the NSFW detection model:
-
-```bash
-# Create a directory for the model
-mkdir -p resources
-
-# Download the model (using GitHub CLI)
-gh release download -R Fyko/nsfw --pattern "model.onnx" -O resources/model.onnx
-
-# Or download manually from https://github.com/Fyko/nsfw/releases/latest
-```
 
 ### From Source
 
@@ -42,6 +29,10 @@ cargo build --release
 
 # The binary will be available at target/release/opendirectoryscanner
 ```
+
+> **Note:**  
+> The NSFW detection model (`resources/model.onnx`) will be downloaded automatically by the program on first run if it is not already present.  
+> No manual download is required.
 
 ## Usage
 
@@ -84,7 +75,10 @@ The generated report includes:
 
 ## How NSFW Detection Works
 
-This tool uses the [nsfw](https://crates.io/crates/nsfw) crate, which leverages a machine learning model to detect potentially inappropriate content in images. The model can classify images into categories such as:
+This tool uses the [nsfw](https://crates.io/crates/nsfw) crate, which leverages a machine learning model to detect potentially inappropriate content in images.  
+**The model file is automatically downloaded to `resources/model.onnx` if not present.**
+
+The model can classify images into categories such as:
 
 - Drawings
 - Hentai
@@ -92,7 +86,7 @@ This tool uses the [nsfw](https://crates.io/crates/nsfw) crate, which leverages 
 - Porn
 - Sexy
 
-The scanner considers an image NSFW if its porn score is above 0.6 or its sexy score is above 0.8. These thresholds can be adjusted in the source code if needed.
+The scanner considers an image NSFW if its porn score is above 0.5, hentai above 0.6, or sexy above 0.8. These thresholds can be adjusted in the source code if needed.
 
 ## HTML Parsing Compatibility
 
