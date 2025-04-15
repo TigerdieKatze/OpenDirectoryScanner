@@ -128,12 +128,12 @@ jobs:
             target
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Ensure NSFW model is present
+      - name: Download NSFW model
         run: |
           mkdir -p resources
-          if [ ! -f resources/model.onnx ]; then
-            curl -L -o resources/model.onnx https://github.com/Fyko/nsfw/releases/latest/download/model.onnx
-          fi
+          curl -L -o resources/model.onnx https://github.com/Fyko/nsfw/releases/latest/download/model.onnx
+        shell: bash
+        
 
       - name: Build
         uses: actions-rs/cargo@v1
