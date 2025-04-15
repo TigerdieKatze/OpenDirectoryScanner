@@ -63,13 +63,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let nsfw_detector = NSFWDetector::new()?;
 
     println!("Starting scan of {} with max depth {}", url, max_depth);
-    let (report, _) = scanner::scan_directory(
-        url,
-        0,
-        max_depth,
-        &client,
-        &nsfw_detector,
-    )?;
+    let (report, _) = scanner::scan_directory(url, 0, max_depth, &client, &nsfw_detector)?;
 
     println!("\n=== Scan Complete ===");
     report.print();

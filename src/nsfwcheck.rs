@@ -29,11 +29,7 @@ impl NSFWDetector {
             }
             let mut resp = reqwest::blocking::get(MODEL_URL)?;
             if !resp.status().is_success() {
-                return Err(format!(
-                    "Failed to download model: HTTP {}",
-                    resp.status()
-                )
-                .into());
+                return Err(format!("Failed to download model: HTTP {}", resp.status()).into());
             }
             let mut out = fs::File::create(path)?;
             let mut buf = Vec::new();
@@ -63,12 +59,14 @@ impl NSFWDetector {
 
         println!("NSFW results for {}: {:?}", image_url, result);
 
-        let check_results = result.iter().any(|classification| match classification.metric {
-            nsfw::model::Metric::Hentai => classification.score > 0.6,
-            nsfw::model::Metric::Porn => classification.score > 0.5,
-            nsfw::model::Metric::Sexy => classification.score > 0.8,
-            _ => false,
-        });
+        let check_results = result
+            .iter()
+            .any(|classification| match classification.metric {
+                nsfw::model::Metric::Hentai => classification.score > 0.6,
+                nsfw::model::Metric::Porn => classification.score > 0.5,
+                nsfw::model::Metric::Sexy => classification.score > 0.8,
+                _ => false,
+            });
 
         Ok(check_results)
     }

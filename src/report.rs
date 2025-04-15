@@ -19,7 +19,6 @@ pub struct FileInfo {
     pub url: String,
     pub size: u64,
     pub file_type: FileType,
-    pub is_nsfw: Option<bool>,
 }
 
 pub struct DirectoryReport {

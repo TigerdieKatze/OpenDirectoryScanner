@@ -43,33 +43,6 @@ fn get_file_type(filename: &str) -> FileType {
     }
 }
 
-fn parse_size(size_str: &str) -> u64 {
-    let size_str = size_str.trim();
-    if size_str.is_empty() || size_str == "-" || size_str == "Directory" {
-        return 0;
-    }
-    if let Ok(size) = size_str.parse::<u64>() {
-        return size;
-    }
-    let mut number_part = String::new();
-    let mut suffix_part = String::new();
-    for c in size_str.chars() {
-        if c.is_ascii_digit() || c == '.' {
-            number_part.push(c);
-        } else {
-            suffix_part.push(c);
-        }
-    }
-    let number = number_part.parse::<f64>().unwrap_or(0.0);
-    match suffix_part.to_uppercase().as_str() {
-        "K" => (number * 1_024.0) as u64,
-        "M" => (number * 1_048_576.0) as u64,
-        "G" => (number * 1_073_741_824.0) as u64,
-        "T" => (number * 1_099_511_627_776.0) as u64,
-        _ => number as u64,
-    }
-}
-
 pub fn scan_directory(
     url: &str,
     depth: u32,
@@ -130,12 +103,10 @@ pub fn scan_directory(
             get_file_type(name)
         };
 
-        let mut is_nsfw = None;
         if matches!(file_type, FileType::Image(_)) {
             let image_url = file_url.trim_end_matches('/').to_string();
             match nsfw_detector.is_nsfw(&image_url, client) {
                 Ok(nsfw) => {
-                    is_nsfw = Some(nsfw);
                     if nsfw {
                         report.nsfw_count += 1;
                         report.nsfw_files.push(image_url.clone());
@@ -152,7 +123,6 @@ pub fn scan_directory(
             url: file_url.clone(),
             size,
             file_type: file_type.clone(),
-            is_nsfw,
         };
 
         if is_directory {
