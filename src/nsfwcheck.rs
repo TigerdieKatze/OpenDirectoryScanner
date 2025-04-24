@@ -9,7 +9,6 @@ use std::path::Path;
 use std::time::{SystemTime, UNIX_EPOCH};
 use toml::{Table, Value};
 
-// Constants
 const CONFIG_PATH: &str = "resources/config.toml";
 const GITHUB_API_RELEASES: &str = "https://api.github.com/repos/Fyko/nsfw/releases/latest";
 const DEFAULT_CONFIG: &str = r#"# Open Directory Scanner Configuration
@@ -125,7 +124,6 @@ impl NSFWDetector {
     }
 
     fn ensure_model(config: &mut Table) -> Result<Vec<u8>, Box<dyn Error>> {
-        // Get model config section or create it
         let model_config = match config.get_mut("model") {
             Some(Value::Table(table)) => table,
             _ => {
@@ -160,10 +158,8 @@ impl NSFWDetector {
 
         let path = Path::new(&model_path);
 
-        // Check GitHub for latest release
         let (latest_version, download_url) = Self::get_latest_release_info()?;
 
-        // Check if model exists and if version is current
         let needs_download = if !path.exists() {
             println!(
                 "NSFW model not found, downloading version {}...",
@@ -231,7 +227,6 @@ impl NSFWDetector {
         let rgba_img = img.to_rgba8();
         let result = examine(&self.model, &rgba_img)?;
 
-        // Get thresholds from config
         let thresholds = match self.config.get("thresholds").and_then(|v| v.as_table()) {
             Some(table) => table,
             None => {
