@@ -234,7 +234,7 @@ impl NSFWDetector {
                 static DEFAULT_PORN: f64 = 0.5;
                 static DEFAULT_HENTAI: f64 = 0.6;
                 static DEFAULT_SEXY: f64 = 0.8;
-                
+
                 return Ok(result
                     .iter()
                     .any(|classification| match classification.metric {
