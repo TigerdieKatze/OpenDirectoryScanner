@@ -17,4 +17,4 @@ target/
 #.idea/
 
 # path of the nsfw model
-resources/
+resources/model.onnx

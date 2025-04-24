@@ -1,0 +1,23 @@
+# Open Directory Scanner Configuration
+
+# Model information
+[model]
+version = "0.0.0"  # Will be updated with the actual version from GitHub
+last_updated = ""  # Will be populated when model is downloaded
+url = "https://github.com/Fyko/nsfw/releases/latest/download/model.onnx"
+path = "resources/model.onnx"
+
+# NSFW detection thresholds
+[thresholds]
+porn = 0.5    # Porn classification threshold
+hentai = 0.6  # Hentai classification threshold
+sexy = 0.8    # Sexy classification threshold
+
+# Scanner defaults
+[scanner]
+default_depth = 3
+default_timeout = 30
+
+# Report settings
+[report]
+include_nsfw_urls = true  # Whether to include URLs of NSFW content in reports
