@@ -35,12 +35,21 @@ default_timeout = 30
 [report]
 include_nsfw_urls = true  # Whether to include URLs of NSFW content in reports"#;
 
+/// NSFW (Not Safe For Work) content detector using machine learning.
+///
+/// This detector downloads and manages an ONNX model for classifying images
+/// as potentially NSFW content based on configurable thresholds.
 pub struct NSFWDetector {
     model: nsfw::Model,
     config: Table,
 }
 
 impl NSFWDetector {
+    /// Creates a new NSFW detector, downloading or updating the model if necessary.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the model cannot be downloaded or loaded
     pub fn new() -> Result<Self, Box<dyn Error>> {
         let mut config = Self::load_config()?;
         let model_data = Self::ensure_model(&mut config)?;
@@ -213,6 +222,20 @@ impl NSFWDetector {
         }
     }
 
+    /// Checks if an image at the given URL contains NSFW content.
+    ///
+    /// # Arguments
+    ///
+    /// * `image_url` - URL of the image to analyze
+    /// * `client` - HTTP client for downloading the image
+    ///
+    /// # Returns
+    ///
+    /// Returns `true` if the image exceeds NSFW thresholds, `false` otherwise
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the image cannot be downloaded or analyzed
     pub fn is_nsfw(&self, image_url: &str, client: &Client) -> Result<bool, Box<dyn Error>> {
         let response = client.get(image_url).send()?;
         if !response.status().is_success() {

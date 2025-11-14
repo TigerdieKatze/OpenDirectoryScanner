@@ -3,6 +3,7 @@ use std::error::Error;
 use std::fs;
 use std::io::Write;
 
+/// Represents the type and format of a file.
 #[derive(Debug, Clone, PartialEq)]
 pub enum FileType {
     Directory,
@@ -13,6 +14,7 @@ pub enum FileType {
     Other(String),
 }
 
+/// Contains metadata about a single file in the scanned directory.
 #[derive(Debug, Clone)]
 pub struct FileInfo {
     pub name: String,
@@ -21,6 +23,7 @@ pub struct FileInfo {
     pub file_type: FileType,
 }
 
+/// Aggregated report of a directory scan containing statistics and analysis results.
 pub struct DirectoryReport {
     pub total_files: usize,
     pub total_directories: usize,
@@ -35,6 +38,12 @@ pub struct DirectoryReport {
     pub nsfw_files: Vec<String>,
     pub largest_file: Option<FileInfo>,
     pub largest_directory: Option<(String, u64)>,
+}
+
+impl Default for DirectoryReport {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl DirectoryReport {
@@ -56,6 +65,7 @@ impl DirectoryReport {
         }
     }
 
+    /// Prints the directory report to stdout in a formatted, human-readable format.
     pub fn print(&self) {
         println!("=== Directory Scan Report ===");
         println!("Total files: {}", self.total_files);
@@ -110,6 +120,15 @@ impl DirectoryReport {
         }
     }
 
+    /// Saves the directory report to a markdown file.
+    ///
+    /// # Arguments
+    ///
+    /// * `path` - The file path where the report should be saved
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the file cannot be created or written to
     pub fn save_to_file(&self, path: &str) -> Result<(), Box<dyn Error>> {
         let mut file = fs::File::create(path)?;
 

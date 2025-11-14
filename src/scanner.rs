@@ -5,6 +5,15 @@ use scraper::{Html, Selector};
 use std::error::Error;
 use std::path::Path;
 
+/// Determines the file type based on the filename extension.
+///
+/// # Arguments
+///
+/// * `filename` - The name of the file to classify
+///
+/// # Returns
+///
+/// Returns a `FileType` enum variant matching the file extension
 fn get_file_type(filename: &str) -> FileType {
     let extension = Path::new(filename)
         .extension()
@@ -43,6 +52,26 @@ fn get_file_type(filename: &str) -> FileType {
     }
 }
 
+/// Recursively scans a directory from a URL and generates a report of its contents.
+///
+/// This function crawls through an open web directory, analyzing files by type,
+/// checking images for NSFW content, and aggregating statistics.
+///
+/// # Arguments
+///
+/// * `url` - The URL of the directory to scan
+/// * `depth` - Current recursion depth
+/// * `max_depth` - Maximum depth to recurse into subdirectories
+/// * `client` - HTTP client for making requests
+/// * `nsfw_detector` - NSFW detection module for analyzing images
+///
+/// # Returns
+///
+/// Returns a tuple containing the directory report and a vector of all file information
+///
+/// # Errors
+///
+/// Returns an error if HTTP requests fail or parsing errors occur
 pub fn scan_directory(
     url: &str,
     depth: u32,
@@ -148,13 +177,12 @@ pub fn scan_directory(
                         for (format, count) in subdir_report.files_by_type {
                             *report.files_by_type.entry(format).or_insert(0) += count;
                         }
-                        if let Some(subdir_largest_file) = subdir_report.largest_file {
-                            if report.largest_file.is_none()
+                        if let Some(subdir_largest_file) = subdir_report.largest_file
+                            && (report.largest_file.is_none()
                                 || report.largest_file.as_ref().unwrap().size
-                                    < subdir_largest_file.size
-                            {
-                                report.largest_file = Some(subdir_largest_file.clone());
-                            }
+                                    < subdir_largest_file.size)
+                        {
+                            report.largest_file = Some(subdir_largest_file.clone());
                         }
                         all_files.extend(subdir_files);
                     }
